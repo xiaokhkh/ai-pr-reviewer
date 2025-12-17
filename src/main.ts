@@ -6,10 +6,11 @@ import {
   warning
 } from '@actions/core'
 import {Bot} from './bot'
-import {OpenAIOptions, Options} from './options'
+import {Options} from './options'
 import {Prompts} from './prompts'
 import {codeReview} from './review'
 import {handleReviewComment} from './review-comment'
+import {GLMClient} from './bot/glm-client'
 
 async function run(): Promise<void> {
   const options: Options = new Options(
@@ -40,17 +41,28 @@ async function run(): Promise<void> {
     getInput('summarize_release_notes')
   )
 
+  // Get API key
+  const apiKey = process.env.GLM_API_KEY
+  if (!apiKey) {
+    setFailed('Please set GLM_API_KEY environment variable')
+    return
+  }
+
   // Create two bots, one for summary and one for review
 
   let lightBot: Bot | null = null
   try {
     lightBot = new Bot(
-      options,
-      new OpenAIOptions(options.openaiLightModel, options.lightTokenLimits)
+      new GLMClient(
+        apiKey,
+        options.openaiLightModel as any,
+        options.systemMessage
+      ),
+      options
     )
   } catch (e: any) {
     warning(
-      `Skipped: failed to create summary bot, please check your openai_api_key: ${e}, backtrace: ${e.stack}`
+      `Skipped: failed to create summary bot, please check your GLM_API_KEY: ${e}, backtrace: ${e.stack}`
     )
     return
   }
@@ -58,12 +70,16 @@ async function run(): Promise<void> {
   let heavyBot: Bot | null = null
   try {
     heavyBot = new Bot(
-      options,
-      new OpenAIOptions(options.openaiHeavyModel, options.heavyTokenLimits)
+      new GLMClient(
+        apiKey,
+        options.openaiHeavyModel as any,
+        options.systemMessage
+      ),
+      options
     )
   } catch (e: any) {
     warning(
-      `Skipped: failed to create review bot, please check your openai_api_key: ${e}, backtrace: ${e.stack}`
+      `Skipped: failed to create review bot, please check your GLM_API_KEY: ${e}, backtrace: ${e.stack}`
     )
     return
   }

@@ -3,7 +3,7 @@ description: 'AI-based PR Reviewer & Summarizer with Chat Capabilities'
 branding:
   icon: 'git-merge'
   color: 'orange'
-author: 'CodeRabbit LLC'
+author: 'xiaokhkh'
 inputs:
   debug:
     required: false
@@ -146,33 +146,33 @@ inputs:
     default: 'false'
   openai_base_url:
     required: false
-    description: 'The url of the openai api interface.'
+    description: 'The url of the API interface (kept for compatibility, not used with GLM).'
     default: 'https://api.openai.com/v1'
   openai_light_model:
     required: false
     description:
-      'Model to use for simple tasks like summarizing diff on a file.'
-    default: 'gpt-3.5-turbo'
+      'Model to use for simple tasks like summarizing diff on a file. Supported GLM models: glm-4.5-flash, glm-4.5-air, glm-4-plus, etc.'
+    default: 'glm-4.5-flash'
   openai_heavy_model:
     required: false
-    description: 'Model to use for complex tasks such as code reviews.'
-    default: 'gpt-4'
+    description: 'Model to use for complex tasks such as code reviews. Supported GLM models: glm-4.6, glm-4.5, glm-4.5-x, etc.'
+    default: 'glm-4.6'
   openai_model_temperature:
     required: false
-    description: 'Temperature for GPT model'
+    description: 'Temperature for GLM model (kept for compatibility, GLM uses fixed temperature)'
     default: '0.05'
   openai_retries:
     required: false
     description:
-      'How many times to retry OpenAI API in case of timeouts or errors?'
+      'How many times to retry GLM API in case of timeouts or errors?'
     default: '5'
   openai_timeout_ms:
     required: false
-    description: 'Timeout for OpenAI API call in millis'
+    description: 'Timeout for GLM API call in millis'
     default: '360000'
   openai_concurrency_limit:
     required: false
-    description: 'How many concurrent API calls to make to OpenAI servers?'
+    description: 'How many concurrent API calls to make to GLM servers?'
     default: '6'
   github_concurrency_limit:
     required: false
@@ -180,44 +180,38 @@ inputs:
     default: '6'
   system_message:
     required: false
-    description: 'System message to be sent to OpenAI'
+    description: 'System message to be sent to GLM model'
     default: |
-      You are `@coderabbitai` (aka `github-actions[bot]`), a language model 
-      trained by OpenAI. Your purpose is to act as a highly experienced 
-      software engineer and provide a thorough review of the code hunks
-      and suggest code snippets to improve key areas such as:
-        - Logic
-        - Security
-        - Performance
-        - Data races
-        - Consistency
-        - Error handling
-        - Maintainability
-        - Modularity
-        - Complexity
-        - Optimization
-        - Best practices: DRY, SOLID, KISS
+      你是 `@coderabbitai`（也称为 `github-actions[bot]`），一个由 GLM 驱动的语言模型。
+      你的职责是作为一名经验丰富的软件工程师，对代码片段进行全面审查，
+      并建议代码改进，重点关注以下方面：
+        - 逻辑
+        - 安全性
+        - 性能
+        - 数据竞争
+        - 一致性
+        - 错误处理
+        - 可维护性
+        - 模块化
+        - 复杂度
+        - 优化
+        - 最佳实践：DRY、SOLID、KISS
 
-      Do not comment on minor code style issues, missing 
-      comments/documentation. Identify and resolve significant 
-      concerns to improve overall code quality while deliberately 
-      disregarding minor issues.
+      不要评论次要的代码风格问题、缺失的注释/文档。
+      识别并解决重要问题以提高整体代码质量，同时有意忽略次要问题。
   summarize:
     required: false
     description: 'The prompt for final summarization response'
     default: |
-      Provide your final response in markdown with the following content:
+      请以 markdown 格式提供最终回复，包含以下内容：
 
-      - **Walkthrough**: A high-level summary of the overall change instead of 
-        specific files within 80 words.
-      - **Changes**: A markdown table of files and their summaries. Group files 
-        with similar changes together into a single row to save space.
-      - **Poem**: Below the changes, include a whimsical, short poem written by 
-        a rabbit to celebrate the changes. Format the poem as a quote using 
-        the ">" symbol and feel free to use emojis where relevant.
+      - **概览**：对整个变更的高层次总结，而非具体文件，控制在 80 字以内。
+      - **变更**：文件和其摘要的 markdown 表格。将具有相似变更的文件分组到同一行以节省空间。
+      - **诗歌**：在变更下方，包含一首由兔子创作的诙谐短诗来庆祝这些变更。
+        使用 ">" 符号将诗歌格式化为引用，并在适当的地方使用表情符号。
 
-      Avoid additional commentary as this summary will be added as a comment on the 
-      GitHub pull request. Use the titles "Walkthrough" and "Changes" and they must be H2.
+      避免额外的评论，因为此摘要将作为评论添加到 GitHub pull request 上。
+      使用标题 "概览" 和 "变更"，它们必须是 H2 级别。
 
   summarize_release_notes:
     required: false
@@ -225,19 +219,18 @@ inputs:
       'The prompt for generating release notes in the same chat as summarize
       stage'
     default: |
-      Craft concise release notes for the pull request. 
-      Focus on the purpose and user impact, categorizing changes as "New Feature", "Bug Fix", 
-      "Documentation", "Refactor", "Style", "Test", "Chore", or "Revert". Provide a bullet-point list, 
-      e.g., "- New Feature: Added search functionality to the UI". Limit your response to 50-100 words 
-      and emphasize features visible to the end-user while omitting code-level details.
+      为此次 pull request 编写简洁的发布说明。
+      重点关注目的和用户影响，将变更分类为"新功能"、"Bug 修复"、"文档"、"重构"、"样式"、"测试"、"杂项"或"回滚"。
+      提供要点列表，例如："- 新功能：在 UI 中添加了搜索功能"。
+      将回复限制在 50-100 字，强调最终用户可见的功能，同时省略代码级别的细节。
   language:
     required: false
     description: ISO code for the response language
-    default: en-US
+    default: zh-CN
   bot_icon:
     required: false
     description: 'The icon for the bot'
-    default: '<img src="https://avatars.githubusercontent.com/in/347564?s=41" alt="Image description" width="20" height="20">'
+    default: '<img src="https://avatars.githubusercontent.com/u/10765730" alt="Image description" width="20" height="20">'
 runs:
   using: 'node16'
   main: 'dist/index.js'
