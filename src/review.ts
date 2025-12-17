@@ -460,12 +460,15 @@ ${SHORT_SUMMARY_END_TAG}
 
 ---
 
+This project is based on [CodeRabbit](https://github.com/coderabbitai/coderabbit). Thanks to their open source contribution.  
+For more powerful features, please consider supporting and learning about CodeRabbit Pro: https://coderabbit.ai
+
 <details>
-<summary>Uplevel your code reviews with CodeRabbit Pro</summary>
+<summary>Upgrade your code review experience: Learn about CodeRabbit Pro</summary>
 
 ### CodeRabbit Pro
 
-If you like this project, please support us by purchasing the [Pro version](https://coderabbit.ai). The Pro version has advanced context, superior noise reduction and several proprietary improvements compared to the open source version. Moreover, CodeRabbit Pro is free for open source projects.
+If you like this project, please support us by purchasing the [Pro version](https://coderabbit.ai). The Pro version offers more advanced context capabilities, better noise reduction, and several proprietary optimizations. Moreover, it is always free for open source projects.
 
 </details>
 `

@@ -7,7 +7,7 @@ interface Message {
 
 export class GLMClient implements LLMClient {
   private conversationHistory: Message[] = []
-  private endpoint: string = 'https://open.bigmodel.cn/api/paas/v4/chat/completions'
+  private endpoint: string
 
   constructor(
     private token: string,
@@ -23,8 +23,10 @@ export class GLMClient implements LLMClient {
       | 'glm-4-airx'
       | 'glm-4-flashx'
       | 'glm-4-flashx-250414' = 'glm-4.6',
-    private readonly systemMessage?: string
+    private readonly systemMessage?: string,
+    endpoint: string = 'https://open.bigmodel.cn/api/paas/v4/chat/completions'
   ) {
+    this.endpoint = endpoint
     if (this.systemMessage) {
       this.conversationHistory.push({
         role: 'system',

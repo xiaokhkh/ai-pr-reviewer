@@ -22,14 +22,14 @@ async function run(): Promise<void> {
     getBooleanInput('review_comment_lgtm'),
     getMultilineInput('path_filters'),
     getInput('system_message'),
-    getInput('openai_light_model'),
-    getInput('openai_heavy_model'),
+    getInput('glm_light_model'),
+    getInput('glm_heavy_model'),
     getInput('openai_model_temperature'),
     getInput('openai_retries'),
     getInput('openai_timeout_ms'),
     getInput('openai_concurrency_limit'),
     getInput('github_concurrency_limit'),
-    getInput('openai_base_url'),
+    getInput('llm_endpoint'),
     getInput('language')
   )
 
@@ -56,7 +56,8 @@ async function run(): Promise<void> {
       new GLMClient(
         apiKey,
         options.openaiLightModel as any,
-        options.systemMessage
+        options.systemMessage,
+        options.apiBaseUrl
       ),
       options
     )
@@ -73,7 +74,8 @@ async function run(): Promise<void> {
       new GLMClient(
         apiKey,
         options.openaiHeavyModel as any,
-        options.systemMessage
+        options.systemMessage,
+        options.apiBaseUrl
       ),
       options
     )

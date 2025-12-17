@@ -178,11 +178,12 @@ class GLMClient {
     model;
     systemMessage;
     conversationHistory = [];
-    endpoint = 'https://open.bigmodel.cn/api/paas/v4/chat/completions';
-    constructor(token, model = 'glm-4.6', systemMessage) {
+    endpoint;
+    constructor(token, model = 'glm-4.6', systemMessage, endpoint = 'https://open.bigmodel.cn/api/paas/v4/chat/completions') {
         this.token = token;
         this.model = model;
         this.systemMessage = systemMessage;
+        this.endpoint = endpoint;
         if (this.systemMessage) {
             this.conversationHistory.push({
                 role: 'system',
@@ -1086,7 +1087,7 @@ __nccwpck_require__.r(__webpack_exports__);
 
 
 async function run() {
-    const options = new _options__WEBPACK_IMPORTED_MODULE_2__/* .Options */ .Ei((0,_actions_core__WEBPACK_IMPORTED_MODULE_0__.getBooleanInput)('debug'), (0,_actions_core__WEBPACK_IMPORTED_MODULE_0__.getBooleanInput)('disable_review'), (0,_actions_core__WEBPACK_IMPORTED_MODULE_0__.getBooleanInput)('disable_release_notes'), (0,_actions_core__WEBPACK_IMPORTED_MODULE_0__.getInput)('max_files'), (0,_actions_core__WEBPACK_IMPORTED_MODULE_0__.getBooleanInput)('review_simple_changes'), (0,_actions_core__WEBPACK_IMPORTED_MODULE_0__.getBooleanInput)('review_comment_lgtm'), (0,_actions_core__WEBPACK_IMPORTED_MODULE_0__.getMultilineInput)('path_filters'), (0,_actions_core__WEBPACK_IMPORTED_MODULE_0__.getInput)('system_message'), (0,_actions_core__WEBPACK_IMPORTED_MODULE_0__.getInput)('openai_light_model'), (0,_actions_core__WEBPACK_IMPORTED_MODULE_0__.getInput)('openai_heavy_model'), (0,_actions_core__WEBPACK_IMPORTED_MODULE_0__.getInput)('openai_model_temperature'), (0,_actions_core__WEBPACK_IMPORTED_MODULE_0__.getInput)('openai_retries'), (0,_actions_core__WEBPACK_IMPORTED_MODULE_0__.getInput)('openai_timeout_ms'), (0,_actions_core__WEBPACK_IMPORTED_MODULE_0__.getInput)('openai_concurrency_limit'), (0,_actions_core__WEBPACK_IMPORTED_MODULE_0__.getInput)('github_concurrency_limit'), (0,_actions_core__WEBPACK_IMPORTED_MODULE_0__.getInput)('openai_base_url'), (0,_actions_core__WEBPACK_IMPORTED_MODULE_0__.getInput)('language'));
+    const options = new _options__WEBPACK_IMPORTED_MODULE_2__/* .Options */ .Ei((0,_actions_core__WEBPACK_IMPORTED_MODULE_0__.getBooleanInput)('debug'), (0,_actions_core__WEBPACK_IMPORTED_MODULE_0__.getBooleanInput)('disable_review'), (0,_actions_core__WEBPACK_IMPORTED_MODULE_0__.getBooleanInput)('disable_release_notes'), (0,_actions_core__WEBPACK_IMPORTED_MODULE_0__.getInput)('max_files'), (0,_actions_core__WEBPACK_IMPORTED_MODULE_0__.getBooleanInput)('review_simple_changes'), (0,_actions_core__WEBPACK_IMPORTED_MODULE_0__.getBooleanInput)('review_comment_lgtm'), (0,_actions_core__WEBPACK_IMPORTED_MODULE_0__.getMultilineInput)('path_filters'), (0,_actions_core__WEBPACK_IMPORTED_MODULE_0__.getInput)('system_message'), (0,_actions_core__WEBPACK_IMPORTED_MODULE_0__.getInput)('glm_light_model'), (0,_actions_core__WEBPACK_IMPORTED_MODULE_0__.getInput)('glm_heavy_model'), (0,_actions_core__WEBPACK_IMPORTED_MODULE_0__.getInput)('openai_model_temperature'), (0,_actions_core__WEBPACK_IMPORTED_MODULE_0__.getInput)('openai_retries'), (0,_actions_core__WEBPACK_IMPORTED_MODULE_0__.getInput)('openai_timeout_ms'), (0,_actions_core__WEBPACK_IMPORTED_MODULE_0__.getInput)('openai_concurrency_limit'), (0,_actions_core__WEBPACK_IMPORTED_MODULE_0__.getInput)('github_concurrency_limit'), (0,_actions_core__WEBPACK_IMPORTED_MODULE_0__.getInput)('llm_endpoint'), (0,_actions_core__WEBPACK_IMPORTED_MODULE_0__.getInput)('language'));
     // print options
     options.print();
     const prompts = new _prompts__WEBPACK_IMPORTED_MODULE_5__/* .Prompts */ .j((0,_actions_core__WEBPACK_IMPORTED_MODULE_0__.getInput)('summarize'), (0,_actions_core__WEBPACK_IMPORTED_MODULE_0__.getInput)('summarize_release_notes'));
@@ -1099,7 +1100,7 @@ async function run() {
     // Create two bots, one for summary and one for review
     let lightBot = null;
     try {
-        lightBot = new _bot__WEBPACK_IMPORTED_MODULE_1__/* .Bot */ .r(new _bot_glm_client__WEBPACK_IMPORTED_MODULE_6__/* .GLMClient */ .Y(apiKey, options.openaiLightModel, options.systemMessage), options);
+        lightBot = new _bot__WEBPACK_IMPORTED_MODULE_1__/* .Bot */ .r(new _bot_glm_client__WEBPACK_IMPORTED_MODULE_6__/* .GLMClient */ .Y(apiKey, options.openaiLightModel, options.systemMessage, options.apiBaseUrl), options);
     }
     catch (e) {
         (0,_actions_core__WEBPACK_IMPORTED_MODULE_0__.warning)(`Skipped: failed to create summary bot, please check your GLM_API_KEY: ${e}, backtrace: ${e.stack}`);
@@ -1107,7 +1108,7 @@ async function run() {
     }
     let heavyBot = null;
     try {
-        heavyBot = new _bot__WEBPACK_IMPORTED_MODULE_1__/* .Bot */ .r(new _bot_glm_client__WEBPACK_IMPORTED_MODULE_6__/* .GLMClient */ .Y(apiKey, options.openaiHeavyModel, options.systemMessage), options);
+        heavyBot = new _bot__WEBPACK_IMPORTED_MODULE_1__/* .Bot */ .r(new _bot_glm_client__WEBPACK_IMPORTED_MODULE_6__/* .GLMClient */ .Y(apiKey, options.openaiHeavyModel, options.systemMessage, options.apiBaseUrl), options);
     }
     catch (e) {
         (0,_actions_core__WEBPACK_IMPORTED_MODULE_0__.warning)(`Skipped: failed to create review bot, please check your GLM_API_KEY: ${e}, backtrace: ${e.stack}`);
@@ -3028,7 +3029,7 @@ class Options {
     heavyTokenLimits;
     apiBaseUrl;
     language;
-    constructor(debug, disableReview, disableReleaseNotes, maxFiles = '0', reviewSimpleChanges = false, reviewCommentLGTM = false, pathFilters = null, systemMessage = '', openaiLightModel = 'gpt-3.5-turbo', openaiHeavyModel = 'gpt-3.5-turbo', openaiModelTemperature = '0.0', openaiRetries = '3', openaiTimeoutMS = '120000', openaiConcurrencyLimit = '6', githubConcurrencyLimit = '6', apiBaseUrl = 'https://api.openai.com/v1', language = 'en-US') {
+    constructor(debug, disableReview, disableReleaseNotes, maxFiles = '0', reviewSimpleChanges = false, reviewCommentLGTM = false, pathFilters = null, systemMessage = '', openaiLightModel = 'gpt-3.5-turbo', openaiHeavyModel = 'gpt-3.5-turbo', openaiModelTemperature = '0.0', openaiRetries = '3', openaiTimeoutMS = '120000', openaiConcurrencyLimit = '6', githubConcurrencyLimit = '6', apiBaseUrl = 'https://open.bigmodel.cn/api/paas/v4/chat/completions', language = 'en-US') {
         this.debug = debug;
         this.disableReview = disableReview;
         this.disableReleaseNotes = disableReleaseNotes;
@@ -3059,8 +3060,8 @@ class Options {
         (0,core.info)(`review_comment_lgtm: ${this.reviewCommentLGTM}`);
         (0,core.info)(`path_filters: ${this.pathFilters}`);
         (0,core.info)(`system_message: ${this.systemMessage}`);
-        (0,core.info)(`openai_light_model: ${this.openaiLightModel}`);
-        (0,core.info)(`openai_heavy_model: ${this.openaiHeavyModel}`);
+        (0,core.info)(`glm_light_model: ${this.openaiLightModel}`);
+        (0,core.info)(`glm_heavy_model: ${this.openaiHeavyModel}`);
         (0,core.info)(`openai_model_temperature: ${this.openaiModelTemperature}`);
         (0,core.info)(`openai_retries: ${this.openaiRetries}`);
         (0,core.info)(`openai_timeout_ms: ${this.openaiTimeoutMS}`);
@@ -4048,12 +4049,15 @@ ${lib_commenter/* SHORT_SUMMARY_END_TAG */.Zb}
 
 ---
 
+This project is based on [CodeRabbit](https://github.com/coderabbitai/coderabbit). Thanks to their open source contribution.  
+For more powerful features, please consider supporting and learning about CodeRabbit Pro: https://coderabbit.ai
+
 <details>
-<summary>Uplevel your code reviews with CodeRabbit Pro</summary>
+<summary>Upgrade your code review experience: Learn about CodeRabbit Pro</summary>
 
 ### CodeRabbit Pro
 
-If you like this project, please support us by purchasing the [Pro version](https://coderabbit.ai). The Pro version has advanced context, superior noise reduction and several proprietary improvements compared to the open source version. Moreover, CodeRabbit Pro is free for open source projects.
+If you like this project, please support us by purchasing the [Pro version](https://coderabbit.ai). The Pro version offers more advanced context capabilities, better noise reduction, and several proprietary optimizations. Moreover, it is always free for open source projects.
 
 </details>
 `;

@@ -23,8 +23,8 @@ const options = new Options(
   )
 
 
-const flashBot = new Bot(new GLMClient('', 'glm-4.5-flash'), options)
-const heavyBot = new Bot(new GLMClient('', 'glm-4.6'), options)
+const flashBot = new Bot(new GLMClient('', 'glm-4.5-flash', undefined, options.apiBaseUrl), options)
+const heavyBot = new Bot(new GLMClient('', 'glm-4.6', undefined, options.apiBaseUrl), options)
 
 // 测试1: 简单对话测试
 console.log('=== Test 1: Simple Chat ===')

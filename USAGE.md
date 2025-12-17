@@ -48,8 +48,8 @@ jobs:
         with:
           debug: false
           review_comment_lgtm: false
-          openai_heavy_model: glm-4.6
-          openai_light_model: glm-4.5-flash
+          glm_heavy_model: glm-4.6
+          glm_light_model: glm-4.5-flash
           path_filters: |
             !dist/**
             !**/*.lock
@@ -68,8 +68,8 @@ jobs:
 
 - `debug`: 启用调试模式（默认: `false`）
 - `review_comment_lgtm`: 即使代码看起来很好也发表评论（默认: `false`）
-- `openai_heavy_model`: 用于代码审查的重型模型（默认: `glm-4.6`）
-- `openai_light_model`: 用于摘要的轻型模型（默认: `glm-4.5-flash`）
+- `glm_heavy_model`: 用于代码审查的重型模型（默认: `glm-4.6`）
+- `glm_light_model`: 用于摘要的轻型模型（默认: `glm-4.5-flash`）
 - `path_filters`: 文件路径过滤规则
 - `max_files`: 最大审查文件数（默认: `150`）
 
@@ -106,8 +106,8 @@ jobs:
     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     GLM_API_KEY: ${{ secrets.GLM_API_KEY }}
   with:
-    openai_heavy_model: glm-4.5
-    openai_light_model: glm-4.5-air
+    glm_heavy_model: glm-4.5
+    glm_light_model: glm-4.5-air
 ```
 
 #### 自定义路径过滤

@@ -39,7 +39,7 @@ export class Options {
     openaiTimeoutMS = '120000',
     openaiConcurrencyLimit = '6',
     githubConcurrencyLimit = '6',
-    apiBaseUrl = 'https://api.openai.com/v1',
+    apiBaseUrl = 'https://open.bigmodel.cn/api/paas/v4/chat/completions',
     language = 'en-US'
   ) {
     this.debug = debug
@@ -73,8 +73,8 @@ export class Options {
     info(`review_comment_lgtm: ${this.reviewCommentLGTM}`)
     info(`path_filters: ${this.pathFilters}`)
     info(`system_message: ${this.systemMessage}`)
-    info(`openai_light_model: ${this.openaiLightModel}`)
-    info(`openai_heavy_model: ${this.openaiHeavyModel}`)
+    info(`glm_light_model: ${this.openaiLightModel}`)
+    info(`glm_heavy_model: ${this.openaiHeavyModel}`)
     info(`openai_model_temperature: ${this.openaiModelTemperature}`)
     info(`openai_retries: ${this.openaiRetries}`)
     info(`openai_timeout_ms: ${this.openaiTimeoutMS}`)
