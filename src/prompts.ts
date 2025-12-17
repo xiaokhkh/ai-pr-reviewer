@@ -110,6 +110,17 @@ Don't annotate code snippets with line numbers. Format and indent code correctly
 Do not use \`suggestion\` code blocks.
 For fixes, use \`diff\` code blocks, marking changes with \`+\` or \`-\`. The line number range for comments with fix snippets must exactly match the range to replace in the new hunk.
 
+## CRITICAL: Line Number Requirements
+
+- **You MUST only reference line numbers that are explicitly shown in the ---new_hunk--- sections above**
+- **The line numbers in your response MUST exactly match the line numbers shown in the ---new_hunk--- blocks**
+- **DO NOT reference line numbers from other parts of the file that are not in the new_hunk sections**
+- **DO NOT reference line numbers from old_hunk sections - only use new_hunk line numbers**
+- **If you see code that needs review but is NOT in the ---new_hunk--- sections, DO NOT comment on it**
+- **Each comment MUST start with a line range in the format: START_LINE-END_LINE:**
+- **START_LINE and END_LINE must be within the same hunk's line number range shown in ---new_hunk---**
+- **Before writing a comment, verify that the line numbers you're using exist in the ---new_hunk--- sections**
+
 - Do NOT provide general feedback, summaries, explanations of changes, or praises 
   for making good additions. 
 - Focus solely on offering specific, objective insights based on the 

@@ -650,12 +650,21 @@ ${commentChain}
 
             try {
               reviewCount += 1
-              await commenter.bufferReviewComment(
-                filename,
-                review.startLine,
-                review.endLine,
-                `${review.comment}`
-              )
+              // If line numbers are invalid, post as general comment instead of inline comment
+              if (review.isGeneralComment) {
+                await commenter.comment(
+                  `**File:** \`${filename}\`\n\n${review.comment}`,
+                  COMMENT_REPLY_TAG,
+                  'create'
+                )
+              } else {
+                await commenter.bufferReviewComment(
+                  filename,
+                  review.startLine,
+                  review.endLine,
+                  `${review.comment}`
+                )
+              }
             } catch (e: any) {
               reviewsFailed.push(`${filename} comment failed (${e as string})`)
             }
@@ -869,6 +878,7 @@ interface Review {
   startLine: number
   endLine: number
   comment: string
+  isGeneralComment?: boolean // true if line numbers are invalid and should be posted as general comment
 }
 
 function parseReview(
@@ -889,20 +899,27 @@ function parseReview(
   let currentComment = ''
   function storeReview(): void {
     if (currentStartLine !== null && currentEndLine !== null) {
-      const review: Review = {
-        startLine: currentStartLine,
-        endLine: currentEndLine,
-        comment: currentComment
-      }
-
-      let withinPatch = false
+      // First, check if the line range is valid (within any patch)
+      let isValidLineRange = false
       let bestPatchStartLine = -1
       let bestPatchEndLine = -1
       let maxIntersection = 0
 
       for (const [startLine, endLine] of patches) {
-        const intersectionStart = Math.max(review.startLine, startLine)
-        const intersectionEnd = Math.min(review.endLine, endLine)
+        // Check if the review line range is completely within this patch
+        if (
+          currentStartLine >= startLine &&
+          currentEndLine <= endLine
+        ) {
+          isValidLineRange = true
+          bestPatchStartLine = currentStartLine
+          bestPatchEndLine = currentEndLine
+          break
+        }
+
+        // Calculate intersection for potential partial overlap
+        const intersectionStart = Math.max(currentStartLine, startLine)
+        const intersectionEnd = Math.min(currentEndLine, endLine)
         const intersectionLength = Math.max(
           0,
           intersectionEnd - intersectionStart + 1
@@ -912,33 +929,77 @@ function parseReview(
           maxIntersection = intersectionLength
           bestPatchStartLine = startLine
           bestPatchEndLine = endLine
-          withinPatch =
-            intersectionLength === review.endLine - review.startLine + 1
         }
-
-        if (withinPatch) break
       }
 
-      if (!withinPatch) {
-        if (bestPatchStartLine !== -1 && bestPatchEndLine !== -1) {
-          review.comment = `> Note: This review was outside of the patch, so it was mapped to the patch with the greatest overlap. Original lines [${review.startLine}-${review.endLine}]
-
-${review.comment}`
-          review.startLine = bestPatchStartLine
-          review.endLine = bestPatchEndLine
-        } else {
-          review.comment = `> Note: This review was outside of the patch, but no patch was found that overlapped with it. Original lines [${review.startLine}-${review.endLine}]
-
-${review.comment}`
-          review.startLine = patches[0][0]
-          review.endLine = patches[0][1]
+      // If line range is completely outside all patches, post as general comment
+      if (!isValidLineRange && maxIntersection === 0) {
+        warning(
+          `Review comment has invalid line range ${currentStartLine}-${currentEndLine}. ` +
+          `Valid patch ranges: ${patches.map(([s, e]) => `${s}-${e}`).join(', ')}. ` +
+          `Posting as general comment instead of inline comment.`
+        )
+        if (debug) {
+          info(`Full comment: ${currentComment}`)
         }
+        // Post as general comment without line numbers
+        const review: Review = {
+          startLine: 0, // placeholder, not used for general comments
+          endLine: 0, // placeholder, not used for general comments
+          comment: `> ⚠️ Note: This review comment references lines [${currentStartLine}-${currentEndLine}] which are outside the current patch. Posted as a general comment.
+
+${currentComment}`,
+          isGeneralComment: true
+        }
+        reviews.push(review)
+        info(
+          `Stored general comment (invalid line range ${currentStartLine}-${currentEndLine}): ${currentComment.trim().substring(0, 100)}...`
+        )
+        return
+      }
+
+      // If line range partially overlaps but is not completely within a patch,
+      // only accept if there's significant overlap (at least 50% of the review range)
+      if (!isValidLineRange && maxIntersection > 0) {
+        const reviewRangeLength = currentEndLine - currentStartLine + 1
+        const overlapRatio = maxIntersection / reviewRangeLength
+
+        if (overlapRatio < 0.5) {
+          warning(
+            `Skipped review comment with insufficient overlap. ` +
+            `Line range: ${currentStartLine}-${currentEndLine}, ` +
+            `Best match: ${bestPatchStartLine}-${bestPatchEndLine}, ` +
+            `Overlap: ${maxIntersection}/${reviewRangeLength} (${(overlapRatio * 100).toFixed(1)}%)`
+          )
+          return
+        }
+
+        // Accept with warning note for partial overlap
+        const review: Review = {
+          startLine: bestPatchStartLine,
+          endLine: bestPatchEndLine,
+          comment: `> ⚠️ Note: This review was partially outside the patch. Original lines [${currentStartLine}-${currentEndLine}], mapped to [${bestPatchStartLine}-${bestPatchEndLine}] with ${maxIntersection} line overlap.
+
+${currentComment}`
+        }
+        reviews.push(review)
+        info(
+          `Stored comment for line range ${currentStartLine}-${currentEndLine} (mapped to ${bestPatchStartLine}-${bestPatchEndLine}): ${currentComment.trim().substring(0, 100)}...`
+        )
+        return
+      }
+
+      // Line range is valid, store the review
+      const review: Review = {
+        startLine: currentStartLine,
+        endLine: currentEndLine,
+        comment: currentComment
       }
 
       reviews.push(review)
 
       info(
-        `Stored comment for line range ${currentStartLine}-${currentEndLine}: ${currentComment.trim()}`
+        `Stored comment for line range ${currentStartLine}-${currentEndLine}: ${currentComment.trim().substring(0, 100)}...`
       )
     }
   }
